@@ -406,7 +406,7 @@ def main(frequency, dataset_path, window_sec):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--freq", type=int, default=30, help="Frequency of the preprocessing")
-    parser.add_argument("--dataset", type=str, default="data/WESAD", help="Path to the dataset")
+    parser.add_argument("--dataset", type=str, default="tmp/data/WESAD", help="Path to the dataset")
     parser.add_argument("--sec", type=int, default=60, help="Window in seconds")
     args = parser.parse_args()
 
@@ -414,9 +414,9 @@ if __name__ == '__main__':
         os.makedirs(args.dataset)
         print("No dataset provided, downloading WESAD dataset")
         # Download the dataset
-        os.system("wget -v https://uni-siegen.sciebo.de/s/HGdUkoNlW1Ub0Gx/download -O data/WESAD.zip")
-        os.system("unzip data/WESAD.zip -d data")
-        os.system("rm data/WESAD.zip")
+        os.system("wget -v https://uni-siegen.sciebo.de/s/HGdUkoNlW1Ub0Gx/download -O tmp/data/WESAD.zip")
+        os.system("unzip tmp/data/WESAD.zip -d tmp/data")
+        os.system("rm tmp/data/WESAD.zip")
 
 
     if args.freq and args.dataset and args.sec:
