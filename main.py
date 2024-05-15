@@ -413,10 +413,6 @@ if __name__ == '__main__':
     if not os.path.exists(args.dataset):
         os.makedirs(args.dataset)
         print("No dataset provided, downloading WESAD dataset")
-        # Download the dataset
-        os.system("wget -v https://uni-siegen.sciebo.de/s/HGdUkoNlW1Ub0Gx/download -O tmp/data/WESAD.zip")
-        os.system("unzip tmp/data/WESAD.zip -d tmp/data")
-        os.system("rm tmp/data/WESAD.zip")
 
 
     if args.freq and args.dataset and args.sec:
