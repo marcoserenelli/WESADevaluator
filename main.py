@@ -406,7 +406,7 @@ def main(frequency, dataset_path, window_sec):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("--freq", type=int, default=30, help="Frequency of the preprocessing")
-    parser.add_argument("--dataset", type=str, default="tmp/data/WESAD", help="Path to the dataset")
+    parser.add_argument("--dataset", type=str, default="tmp/opt/myproject/data/WESAD", help="Path to the dataset")
     parser.add_argument("--sec", type=int, default=60, help="Window in seconds")
     args = parser.parse_args()
 
