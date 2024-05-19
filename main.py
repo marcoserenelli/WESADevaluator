@@ -210,6 +210,7 @@ def plot_loss(history, name, path):
     plt.show()
 
 
+"""
 def get_model(input_dim, optimizer, learning_rate, n_classes=3, add_noise=False, stdev=0.1, seed=42, channels=14):
     if seed is not None:
         np.random.seed(seed)
@@ -245,9 +246,41 @@ def get_model(input_dim, optimizer, learning_rate, n_classes=3, add_noise=False,
     print(model.summary())
 
     return model
+"""
 
 
-def start_training(train_generator, val_generator, name="", n_classes=3, channels=14, PATIENTE=20, EPOCHS=100, IMAGE_SIZE=128,
+def get_model_custom(input_dim, optimizer, learning_rate, n_classes=3, add_noise=False, stdev=0.1, seed=42,
+                     channels=14):
+    from keras import Sequential
+    from keras import backend as K
+    from tensorflow.keras.layers import Dense, Conv2D, MaxPooling2D, Dropout, Flatten, GlobalAveragePooling2D
+
+    model = Sequential()
+    model.add(Conv2D(32, kernel_size=(3, 3), activation='relu', input_shape=(input_dim, input_dim, channels), data_format='channels_last'))
+    model.add(MaxPooling2D((2, 2)))
+    # model.add(Dropout(0.25))
+
+    model.add(Conv2D(64, kernel_size=(3, 3), activation='relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    # model.add(Dropout(0.25))
+
+    model.add(GlobalAveragePooling2D())
+
+    model.add(Dense(512, activation='sigmoid'))
+    model.add(Dense(256, activation='sigmoid'))
+    model.add(Dense(128, activation='sigmoid'))
+    model.add(Dense(1, activation='sigmoid'))
+    op = tf.keras.optimizers.Adam(learning_rate=learning_rate, amsgrad=True)
+    model.compile(optimizer=op,
+                  loss='binary_crossentropy',
+                  metrics=['accuracy'])
+
+    model.summary()
+    return model
+
+
+def start_training(train_generator, val_generator, name="", n_classes=3, channels=14, PATIENTE=10, EPOCHS=100,
+                   IMAGE_SIZE=128,
                    OPTIMIZER='AMSGrad', LEARNING_RATE=0.0012, MODEL_OUTPUT_FOLDER="data/WESAD/Models",
                    RESAMPLE_FREQ=30):
     # Start time
@@ -266,7 +299,7 @@ def start_training(train_generator, val_generator, name="", n_classes=3, channel
         restore_best_weights=True  # Restore model weights from the epoch with the best value
     )
 
-    model = get_model(IMAGE_SIZE, OPTIMIZER, LEARNING_RATE, n_classes=n_classes, add_noise=False, stdev=0.1, seed=42,
+    model = get_model_custom(IMAGE_SIZE, OPTIMIZER, LEARNING_RATE, n_classes=n_classes, add_noise=False, stdev=0.1, seed=42,
                       channels=channels)
     history = model.fit(train_generator, validation_data=val_generator, epochs=EPOCHS,
                         callbacks=[early_stopping, tboard_callback])
@@ -331,7 +364,7 @@ def main(frequency, dataset_path, window_sec):
     # Seed
     SEED = 42
     # Batch size
-    BATCH_SIZE = 31
+    BATCH_SIZE = 32
     # Image size
     IMAGE_SIZE = 128
     # Learning Rate
@@ -341,7 +374,7 @@ def main(frequency, dataset_path, window_sec):
     # EPOCHS
     EPOCHS = 100
     # EARLY STOPPING PATIENTE
-    PATIENTE = 5
+    PATIENTE = 10
     # MTF Bins
     N_BINS = 3
     # Reurrence Plot Threshold
@@ -399,21 +432,20 @@ def main(frequency, dataset_path, window_sec):
                                 time_step=TIME_STEP, shuffle=True, seed=SEED)
 
     start_training(train_generator, val_generator, "Recurrence Plot", n_classes=3, channels=14, PATIENTE=PATIENTE,
-                     EPOCHS=EPOCHS, IMAGE_SIZE=IMAGE_SIZE, OPTIMIZER=OPTIMIZER, LEARNING_RATE=LEARNING_RATE,
-                     MODEL_OUTPUT_FOLDER=MODEL_OUTPUT_FOLDER, RESAMPLE_FREQ=RESAMPLE_FREQ)
+                   EPOCHS=EPOCHS, IMAGE_SIZE=IMAGE_SIZE, OPTIMIZER=OPTIMIZER, LEARNING_RATE=LEARNING_RATE,
+                   MODEL_OUTPUT_FOLDER=MODEL_OUTPUT_FOLDER, RESAMPLE_FREQ=RESAMPLE_FREQ)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("--freq", type=int, default=30, help="Frequency of the preprocessing")
-    parser.add_argument("--dataset", type=str, default="tmp/opt/myproject/data/WESAD", help="Path to the dataset")
-    parser.add_argument("--sec", type=int, default=60, help="Window in seconds")
+    parser.add_argument("--freq", type=int, default=700, help="Frequency of the preprocessing")
+    parser.add_argument("--dataset", type=str, default="data/WESAD", help="Path to the dataset")
+    parser.add_argument("--sec", type=int, default=30, help="Window in seconds")
     args = parser.parse_args()
 
     if not os.path.exists(args.dataset):
         os.makedirs(args.dataset)
         print("No dataset provided, downloading WESAD dataset")
-
 
     if args.freq and args.dataset and args.sec:
         main(args.freq, args.dataset, args.sec)

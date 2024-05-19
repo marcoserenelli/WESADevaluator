@@ -55,4 +55,6 @@ class GAFGenerator(keras.utils.Sequence):
 
     def __getitem__(self, idx):
         batch = self.idx_list[idx * self.batch_size:(idx + 1) * self.batch_size]
-        return np.array([self.get_image(subject, i) for subject, i, _ in batch]), np.array([y for _, _, y in batch])
+        y = np.array([y for _, _, y in batch])
+        y_new = y - 1
+        return np.array([self.get_image(subject, i) for subject, i, _ in batch]), y_new
